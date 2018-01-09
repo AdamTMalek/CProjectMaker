@@ -3,7 +3,7 @@ import os
 import re
 
 sys.path.append(os.path.join(os.path.dirname(__file__)))
-from make import create_folders
+from make import create_project
 
 
 def main(argv):
@@ -17,7 +17,7 @@ def main(argv):
         print("The project name is invalid. Make sure it's only consisted of alphabetic characters")
         return
 
-    create_folders(project_name)
+    create_project(project_name)
 
 
 def valid_name(name):
