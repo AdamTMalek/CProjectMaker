@@ -1,0 +1,18 @@
+CC = gcc
+
+CFLAGS = -g -Wall -pedantic
+
+SRC = src
+OBJ = build
+
+SOURCES = $(wildcard $(SRC)/*.c)
+OBJECTS = $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
+
+$(OBJ)/%.o: $(SRC)/%.c
+	$(CC) -c $< -o $@
+
+all: $(OBJECTS)
+	$(CC) $^ -o $(OBJ)/[PROJECT_NAME]
+
+clean:
+	rm -rf $(OBJ)/*

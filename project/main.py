@@ -8,7 +8,7 @@ from make import create_project
 
 def main(argv):
     if len(argv) == 1:
-        print(os.path.join(os.path.dirname(__file__)))
+        print("You have to specify the project name")
         return
 
     project_name = argv[1]
