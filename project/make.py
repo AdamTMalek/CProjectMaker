@@ -1,17 +1,37 @@
+import errno
 import os
 from shutil import copyfile
-
 
 directory = ""
 name = ""
 
 
 def create_folders(project_name):
+    """
+    Creates folders for the project
+    :param project_name: Project name will be used as the name of the main directory
+    :return: True if creating folders finished successfully, False otherwise
+    """
+
     global directory
     directory = os.path.join(os.getcwd(), project_name)
-    os.makedirs(directory)
+
+    try:
+        os.makedirs(directory)
+    except OSError as error:
+        if error.errno == errno.EEXIST:
+            print("Error - Project with the same name already exists")
+            return False
+        if error.errno == errno.EACCES:
+            print("Error - Permission denied")
+            return False
+        else:
+            raise error
+
     os.makedirs(os.path.join(directory, "src"))
     os.makedirs(os.path.join(directory, "build"))
+
+    return True
 
 
 def create_main_file():
@@ -38,6 +58,6 @@ def create_makefile():
 def create_project(project_name):
     global name
     name = project_name
-    create_folders(project_name)
-    create_main_file()
-    create_makefile()
+    if create_folders(project_name):
+        create_main_file()
+        create_makefile()
