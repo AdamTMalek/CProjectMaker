@@ -11,15 +11,16 @@ from make import create_project
 def main(argv):
     if len(argv) == 1:
         print("You have to specify the project name")
-        return
+        return False
 
     project_name = argv[1]
 
     if not valid_name(project_name):
         print("The project name is invalid. Make sure it's only consisted of alphabetic characters")
-        return
+        return False
 
     create_project(project_name)
+    return True
 
 
 def valid_name(name):
