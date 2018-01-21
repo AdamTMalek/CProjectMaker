@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from io import StringIO
 import tests.loader as loader
 
-cpm = loader.load("dupcia")
+cpm = loader.load("cpm")
 
 
 class TestMain(unittest.TestCase):
