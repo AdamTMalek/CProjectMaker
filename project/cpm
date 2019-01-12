@@ -24,7 +24,7 @@ def main(argv):
 
 
 def valid_name(name):
-    return not re.search(r"[^a-zA-Z]+", name)
+    return not re.search(r"[^a-zA-Z0-9]+", name)
 
 
 if __name__ == "__main__":
