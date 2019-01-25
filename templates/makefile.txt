@@ -1,18 +1,36 @@
+# Compiler:
 CC = gcc
 
+# C flags:
 CFLAGS = -g -Wall -pedantic
 
+# Directory with all the source files:
 SRC = src
+# Find all subdirectories inside the SRC directory. Remove ./ with subst.
+VPATH = $(shell find $(SRC) -type d)
+
+# Directory with where the compiled files go:
 OBJ = build
 
-SOURCES = $(wildcard $(SRC)/*.c)
-OBJECTS = $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
+# Find all .c files
+SOURCES = $(subst ./,,$(shell find . -name "*.c"))
+# Use $(notdir ...) to get only the filenames (ignore the directories)
+# Delete file extensions with $(basename ...)
+FILENAMES = $(basename $(notdir $(SOURCES)))
+# All objects will be stored inside OBJ directory, without any sub-directories
+# so, once we have the filenames we just simply add the .o suffix to them
+# then, add the $(OBJ)/ prefix to put them inside the directory
+OBJECTS = $(addprefix $(OBJ)/, $(addsuffix .o, $(FILENAMES)))
 
-$(OBJ)/%.o: $(SRC)/%.c
+.PHONY: all
+all: $(OBJECTS)
+	$(CC) -o $(OBJ)/[PROJECT_NAME] $(OBJECTS)
+
+$(OBJ)/%.o: %.c
 	$(CC) -c $< -o $@
 
-all: $(OBJECTS)
-	$(CC) $^ -o $(OBJ)/[PROJECT_NAME]
-
+.PHONY: clean
 clean:
-	rm -rf $(OBJ)/*
+	@echo "Deleting all compiled files..."
+	rm -f $(OBJ)/*
+	@echo "Done."
