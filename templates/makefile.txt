@@ -27,7 +27,7 @@ all: $(OBJECTS)
 	$(CC) -o $(OBJ)/[PROJECT_NAME] $(OBJECTS)
 
 $(OBJ)/%.o: %.c
-	$(CC) -c $< -o $@
+	$(CC) -c $< $(CFLAGS) -o $@
 
 .PHONY: clean
 clean:
