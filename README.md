@@ -51,7 +51,7 @@ will create two files, **gpio.h** with the following content:
 ```
 and **gpio.c**:
 ```c
-#include "[NAME].h"
+#include "gpio.h"
 
 
 ```
