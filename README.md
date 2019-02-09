@@ -1,17 +1,7 @@
 # CProjectMaker
-CProjectMaker (or cpm for short) lets you create base of any C project with just one simple command.
-What exactly does it do? It creates:
-* src and build folders
-* main.c file with the following content:
-* ```c
-  #include <stdlib.h>
-    
-  int main(int argc, char *argv[])
-  {
-      return 0;
-  }
-  ```
-* A simple makefile to compile the whole project
+CProjectMaker (or cpm for short) makes it much easier to:
+* Create a base for a new project (see usage for more information)
+* Create a module (header with include guard + source file)
 
 ## Getting Started
 **Please note that the script was developed only for the Linux operating system**
@@ -23,19 +13,61 @@ sudo python3 install.py
 This will create a symbolic link in `/usr/local/bin`.
 
 ### Usage
-Go to a directory where you want a new project to be created, then call the script like in the following example:
 ```
-cpm [Project_Name]
+cpm [-h] [-m] [-d] name
 ```
-Where the [Project_Name] is obviously your project name.
-Now you should see a new folder named [Project_Name]. Inside it you will find
-* Makefile
-* src directory with main.c
-* build directory where all the compiled files will go
+Arguments can be combined. These two lines will have exactly the same result:
+```
+cpm -m -d gpio
+cpm -md gpio
+```
 
+
+If there are no optional arguments present then the script will create a base for the project with the following content:
+* src and build folders
+* makefile
+* main.c file with the following content
+    ```c
+    #include <stdlib.h>
+    
+    int main(int argc, char *argv[])
+    {
+        return 0;
+    }
+    ```
+By using the -m or --module argument the script will instead create a module with the given name in the current working
+directory. For example the following:
+```
+cpm -m gpio
+```
+will create two files, **gpio.h** with the following content:
+```c
+#ifndef GPIO_H
+#define GPIO_H
+
+
+
+#endif
+```
+and **gpio.c**:
+```c
+#include "[NAME].h"
+
+
+```
+
+
+A special option available only when creating module is the -d or --directory option. This will create a separate 
+directory for the module. For example:
+```
+cpm -md gpio
+```
+will create a new **gpio** directory with **gpio.c** and **gpio.h** inside.
 ## Uninstalling
-If for some reason you want to uninstall the cpm you can do this using the `install.py` script. This is done by adding `remove` argument:
+If for some reason you want to uninstall the cpm you can do this using the `install.py` script. 
+This is done by adding `remove` argument:
 ```
 sudo python3 install.py remove
 ```
-You can also go to `/usr/local/bin` and delete `cpm`, after doing so delete the whole cpm package wherever it was downloaded.
+You can also go to `/usr/local/bin` and delete `cpm`, after doing so delete the whole cpm package wherever it was 
+downloaded.
