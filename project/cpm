@@ -3,24 +3,48 @@
 import sys
 import os
 import re
+import argparse
+
 
 sys.path.append(os.path.join(os.path.dirname(__file__)))
-from make import create_project
+import project
+import module
 
 
-def main(argv):
-    if len(argv) == 1:
-        print("You have to specify the project name")
-        return False
+def main():
+    arg_parser = setup_arg_parser()
+    args = arg_parser.parse_args()
 
-    project_name = argv[1]
+    if not valid_name(args.name):
+        print("The name " + args.name + " is not valid. Only alphanumerical characters are accepted.")
+        return
 
-    if not valid_name(project_name):
-        print("The project name is invalid. Make sure it's only consisted of alphabetic characters")
-        return False
+    if args.directory and not args.module:
+        print("Directory argument requires module argument to be preset as well")
+        return
 
-    create_project(project_name)
-    return True
+    if not args.module:
+        project.create_project(args.name)
+    else:
+        module.create_module(args.name, args.directory)
+
+
+def setup_arg_parser():
+    """
+    Set up the parser and all arguments supported by the program
+    :return: ArgumentParser with supported arguments
+    """
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("name", help="create a project with the given name if the module option (-m or --module)"
+                                         " is not specified. The name must consist of only alphanumerical characters")
+    module_group = arg_parser.add_argument_group()
+    module_group.add_argument("-m", "--module", help="create a module (.c and .h files) with the specified name",
+                              action="store_true")
+    module_group.add_argument("-d", "--directory", help="create a directory for the module. "
+                                                        "Note that this argument requires the module argument "
+                                                        "to be preset as well",
+                              action="store_true")
+    return arg_parser
 
 
 def valid_name(name):
@@ -28,4 +52,4 @@ def valid_name(name):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
