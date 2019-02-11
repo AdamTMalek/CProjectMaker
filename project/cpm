@@ -23,10 +23,12 @@ def main():
         print("Directory argument requires module argument to be preset as well")
         return
 
-    if not args.module:
-        project.create_project(args.name)
-    else:
+    if args.module:
         module.create_module(args.name, args.directory)
+    elif args.rename:
+        project.rename(args.rename, args.name)
+    else:
+        project.create_project(args.name)
 
 
 def setup_arg_parser():
@@ -44,6 +46,7 @@ def setup_arg_parser():
                                                         "Note that this argument requires the module argument "
                                                         "to be preset as well",
                               action="store_true")
+    arg_parser.add_argument("-r", "--rename", help="rename an existing project to [name]", metavar='old_name')
     return arg_parser
 
 
