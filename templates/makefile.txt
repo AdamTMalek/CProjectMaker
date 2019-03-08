@@ -26,6 +26,11 @@ OBJECTS = $(addprefix $(OBJ)/, $(addsuffix .o, $(FILENAMES)))
 all: $(OBJECTS)
 	$(CC) -o $(OBJ)/[PROJECT_NAME] $(OBJECTS)
 
+$(OBJECTS): | $(OBJ)/  # "Check" if the build directory exists
+
+$(OBJ)/:  # Create a build (object) directory
+	mkdir -p $@
+
 $(OBJ)/%.o: %.c
 	$(CC) -c $< $(CFLAGS) -o $@
 
