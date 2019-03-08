@@ -71,4 +71,4 @@ def rename(old, new):
     os.rename(old, new)
     makefile_path = (os.path.join(os.getcwd(), new, "makefile"))
     for line in fileinput.input(makefile_path, inplace=True):
-        print(line.replace(old, new))
+        print(line.replace(old, new), end='')  # Change the end to an empty string, otherwise it will put another \n.
