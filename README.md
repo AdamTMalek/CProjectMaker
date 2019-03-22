@@ -1,5 +1,5 @@
-# CProjectMaker
-CProjectMaker (or cpm for short) makes it much easier to:
+# CProjectManager
+CProjectManager (or cpm for short) makes it much easier to:
 * Create a base for a new project (see usage for more information)
 * Create a module (header with include guard + source file)
 
