@@ -88,7 +88,7 @@ def rename_in_include(line, old_name, new_name):
     :param line: line of a file
     :param old_name: old name of the module (header file)
     :param new_name: new name to be substituted in
-    :return: modified line
+    :return: updated line and true/false depending if the line was modified
     """
 
     """
@@ -107,7 +107,10 @@ def rename_in_include(line, old_name, new_name):
     It works pretty much the same as the first regex.
     The 2nd captured group is the filename without extension which the name is replaced with the [new_name] 
     """
-    return re.sub(r'(#include "[./a-zA-Z]*)({0})(\.h*")'.format(old_name), r"\1%s\3" % new_name, dir_replaced)
+    line, replacements = re.subn(r'(#include "[./a-zA-Z]*)({0})(\.h*")'.format(old_name), r"\1%s\3" % new_name,
+                                 dir_replaced)
+
+    return line, replacements > 0
 
 
 def rename_in_source(source_file, old_name, new_name):
@@ -116,9 +119,18 @@ def rename_in_source(source_file, old_name, new_name):
     :param source_file: file to be scanned/updated
     :param old_name: old module name
     :param new_name: new name
+    :return: true if the file contents have changed
     """
+    changed = False  # Indicates whether the file contents have changed or not
     for line in fileinput.input(source_file, inplace=True):
-        print(rename_in_include(line, old_name, new_name), end='')
+        renamed = rename_in_include(line, old_name, new_name)
+        # rename_in_include returns a tuple
+        # renamed[0] is the modified line
+        # renamed[1] is a boolean flag
+        print(renamed[0], end='')
+        if not changed and renamed[1]:
+            changed = True
+    return changed
 
 
 def rename_source(dir, old_name, name):
@@ -207,10 +219,12 @@ def update_usages(old_name, name):
     # Get all source files inside src and its subdirectories
     source_files = get_all_source_files(src_dir)
     # In each file, look for the module usage and update the name if such usage exists
+    updated_count = 0  # Number of files that were updated
     for file in source_files:
-        rename_in_source(file, old_name, name)
+        if rename_in_source(file, old_name, name) is True:
+            updated_count += 1
 
-    print("Successfully updated all sources that use the module")
+    print("Successfully updated {0} source file(s) that use this module".format(updated_count))
 
 
 def rename(old_name, name):
