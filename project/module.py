@@ -145,16 +145,16 @@ def rename_header_constant(line, old_name, new_name):
     old_name = old_name.upper()
     new_name = new_name.upper()
 
+    # Looks for [OLD_NAME]_H and substitutes it with [NEW_NAME]_H. Replacing will also affect the comments
     return re.sub(r'([/*#a-zA-Z ]*)({0})(_H)([/*#a-zA-Z _]+)*'.format(old_name), r"\1%s\3\4" % new_name, line)
 
 
 def rename_header_constants(file, old_name, new_name):
     """
     Rename the header
-    :param file:
-    :param old_name:
-    :param new_name:
-    :return:
+    :param file: header file
+    :param old_name: old (existing) module name
+    :param new_name: new name
     """
     for line in fileinput.input(file, inplace=True):
         print(rename_header_constant(line, old_name, new_name), end='')
@@ -174,6 +174,45 @@ def rename_header(module_dir, old_name, name):
     rename_header_constants(new_path, old_name, name)
 
 
+def get_all_source_files(src_dir):
+    """
+    Get all .c files inside the given directory
+    :param src_dir: directory with source files
+    :return: list of .c files inside the directory
+    """
+    files_list = []
+    for root, dirs, files in os.walk(src_dir):
+        for file in files:
+            if file.endswith('.c'):
+                files_list.append(os.path.join(root, file))
+    return files_list
+
+
+def update_usages(old_name, name):
+    """
+    Look for the module include directive in every source file inside src directory (if such can be found in
+    the current working directory path
+    :param old_name: old name of the module
+    :param name: new name
+    """
+    # Try to find src directory in the current working directory path
+    try:
+        src_dir = re.match(r'([\S\\ ]+src)', os.getcwd()).group(0)
+    except AttributeError:
+        # src directory not found
+        print("Warning - src directory was not found in the current path. "
+              "Files that use the module will not be updated")
+        return
+
+    # Get all source files inside src and its subdirectories
+    source_files = get_all_source_files(src_dir)
+    # In each file, look for the module usage and update the name if such usage exists
+    for file in source_files:
+        rename_in_source(file, old_name, name)
+
+    print("Successfully updated all sources that use the module")
+
+
 def rename(old_name, name):
     """
     Rename the module
@@ -181,6 +220,10 @@ def rename(old_name, name):
     :param name: new name
     """
     working_directory = os.getcwd()
+
+    if not already_exists(os.path.join(working_directory, old_name)):
+        print("Error - cannot rename the module. Module with the name {0} does not exist.".format(old_name))
+        return
 
     if already_exists(os.path.join(working_directory, name)):
         print("Error - cannot rename the module. Module with the name {0} already exists.".format(name))
@@ -198,6 +241,8 @@ def rename(old_name, name):
         rename_header(working_directory, old_name, name)
 
     print("Successfully renamed the module")
+
+    update_usages(old_name, name)
 
 
 def already_exists(name):
