@@ -18,7 +18,7 @@ def main():
     # Before executing any sub-parser handlers (like project_args_handler)
     # the name and rename (if used) are validated.
     # If any of these names are invalid, the program will terminate
-    if hasattr(args, 'rename') and not valid_name(args.rename):
+    if hasattr(args, 'rename') and args.rename is not None and not valid_name(args.rename):
         print_invalid_name_error(args.rename)
         return
 
