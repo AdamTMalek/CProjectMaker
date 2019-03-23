@@ -64,7 +64,7 @@ def module_args_handler(args):
     :param args: Parsed arguments
     """
     if args.rename:
-        print("Renaming module is not implemented yet!")
+        module.rename(args.rename, args.name)
     else:
         module.create_module(args.name, args.directory)
 

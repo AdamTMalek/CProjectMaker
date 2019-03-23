@@ -1,4 +1,6 @@
 import os
+import re
+import fileinput
 
 directory = ""
 
@@ -44,7 +46,164 @@ def create_module(name, create_directory):
     create_header(name)
 
 
+def directory_exists(name):
+    dir_path = os.path.join(os.getcwd(), name)
+    return os.path.exists(dir_path)
+
+
+def source_exists(name, file_dir=os.getcwd()):
+    """
+    Checks if the source file [name].c exists in the current working directory, or, if specified, given directory
+    :param name: Filename without the extension
+    :param file_dir: Directory where the source file could exist
+    :return: True if source file exists
+    """
+    return os.path.exists(os.path.join(file_dir, name + '.c'))
+
+
+def header_exists(name, file_dir=os.getcwd()):
+    """
+    Check if the source file [name].h exists in the current working directory, or, if specified, given directory
+    :param name: Filename without the extension
+    :param file_dir: Directory where the header file could exist
+    :return: True if source file exists
+    """
+    return os.path.exists(os.path.join(file_dir, name + '.h'))
+
+
+def rename_directory(old_name, name):
+    """
+    Rename directory with old_name that exists in the current working directory to name
+    :param old_name: Old (existing) directory name
+    :param name: New name
+    """
+    old_dir = os.path.join(os.getcwd(), old_name)
+    new_dir = os.path.join(os.getcwd(), name)
+    os.rename(old_dir, new_dir)
+
+
+def rename_in_include(line, old_name, new_name):
+    """
+    Matches #include with the old_name as the header file and replaces the name to the new name
+    :param line: line of a file
+    :param old_name: old name of the module (header file)
+    :param new_name: new name to be substituted in
+    :return: modified line
+    """
+
+    """
+    There are two regular expressions and substitutions taking place.
+    The first one is responsible for renaming the directory (if it exists) of the module.
+    The regexp will capture everything to reuse after replacement
+    The first capture group is the #include "[../[directories]/]" part.
+    The second group captures the name of the module directory which contains the header file named [old_name].h
+    Finally, the last group captures the rest of the line (i.e. /[old_name].h" part)
+    """
+    dir_replaced = re.sub(r'(#include "[./a-zA-Z_\d]*)({0})(/{0}\.h*")'.format(old_name), r"\1%s\3" % new_name, line)
+
+    """
+    The second regex is responsible for renaming the actual header file.
+    Again, it has 3 capture groups where 1st and 3rd are there to keep the parts of the line that do not change.
+    It works pretty much the same as the first regex.
+    The 2nd captured group is the filename without extension which the name is replaced with the [new_name] 
+    """
+    return re.sub(r'(#include "[./a-zA-Z]*)({0})(\.h*")'.format(old_name), r"\1%s\3" % new_name, dir_replaced)
+
+
+def rename_in_source(source_file, old_name, new_name):
+    """
+    Rename the module include header inside the source file
+    :param source_file: file to be scanned/updated
+    :param old_name: old module name
+    :param new_name: new name
+    """
+    for line in fileinput.input(source_file, inplace=True):
+        print(rename_in_include(line, old_name, new_name), end='')
+
+
+def rename_source(dir, old_name, name):
+    """
+    Rename the source file and its included header file inside
+    :param dir: Directory in which the source file is located
+    :param old_name: Old (existing) name of the file without .c extension
+    :param name: New name
+    """
+    old_path = os.path.join(dir, old_name + '.c')
+    new_path = os.path.join(dir, name + '.c')
+    os.rename(old_path, new_path)
+    rename_in_source(new_path, old_name, name)
+
+
+def rename_header_constant(line, old_name, new_name):
+    """
+    Renames file include-guard-constant
+    :param line: line of a file
+    :param old_name: old name of the module
+    :param new_name: new name
+    :return: modified line
+    """
+    old_name = old_name.upper()
+    new_name = new_name.upper()
+
+    return re.sub(r'([/*#a-zA-Z ]*)({0})(_H)([/*#a-zA-Z _]+)*'.format(old_name), r"\1%s\3\4" % new_name, line)
+
+
+def rename_header_constants(file, old_name, new_name):
+    """
+    Rename the header
+    :param file:
+    :param old_name:
+    :param new_name:
+    :return:
+    """
+    for line in fileinput.input(file, inplace=True):
+        print(rename_header_constant(line, old_name, new_name), end='')
+
+
+def rename_header(module_dir, old_name, name):
+    """
+    Rename the header file and the constants inside it
+    :param module_dir: directory of the header file
+    :param old_name: old name of the module
+    :param name: new name
+    """
+    old_path = os.path.join(module_dir, old_name + '.h')
+    new_path = os.path.join(module_dir, name + '.h')
+    os.rename(old_path, new_path)
+
+    rename_header_constants(new_path, old_name, name)
+
+
+def rename(old_name, name):
+    """
+    Rename the module
+    :param old_name: old (existing) name
+    :param name: new name
+    """
+    working_directory = os.getcwd()
+
+    if already_exists(os.path.join(working_directory, name)):
+        print("Error - cannot rename the module. Module with the name {0} already exists.".format(name))
+        return
+
+    # If the module is created inside a directory, rename it and go inside it
+    if directory_exists(old_name):
+        rename_directory(old_name, name)
+        working_directory = os.path.join(working_directory, name)
+
+    # Rename source and header files
+    if source_exists(old_name, file_dir=working_directory):
+        rename_source(working_directory, old_name, name)
+    if header_exists(old_name, file_dir=working_directory):
+        rename_header(working_directory, old_name, name)
+
+    print("Successfully renamed the module")
+
+
 def already_exists(name):
-    return os.path.exists(os.path.join(os.getcwd(), name + '.c')) or \
-           os.path.exists(os.path.join(os.getcwd(), name + '.h')) or \
-           os.path.exists(os.path.join(os.getcwd(), name))
+    """
+    Check if the module already exists
+    :param name: name of a module
+    :return: True if either source, header or directory with the given name exists
+    """
+    return source_exists(name) or header_exists(name) or directory_exists(name)
