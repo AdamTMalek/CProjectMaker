@@ -1,5 +1,6 @@
 import unittest
-from project.module import match_and_replace_include as replace_include
+from project.module import rename_in_include as replace_include
+from project.module import rename_header_constant as replace_header
 
 class ModuleTest(unittest.TestCase):
     """
@@ -9,7 +10,6 @@ class ModuleTest(unittest.TestCase):
     def test_include_regex(self):
         """
         Test the include regex used to find and replace #include... when renaming the module
-        :return:
         """
         tests = [
             {
@@ -37,3 +37,31 @@ class ModuleTest(unittest.TestCase):
         for test in tests:
             with self.subTest(original=test['original']):
                 self.assertEqual(test['expected'], replace_include(test['original'], 'foo', 'bar'))
+
+
+    def test_header_regex(self):
+        """
+        Test the header regex used to find and replace include-guard-constants inside a header
+        """
+        tests = [
+            {
+                'original': '#ifndef FOO_H',
+                'expected': '#ifndef BAR_H'
+            },
+            {
+                'original': '#define FOO_H',
+                'expected': '#define BAR_H'
+            },
+            {
+                'original': '#endif /* FOO_H */',
+                'expected': '#endif /* BAR_H */',
+            },
+            {
+                'original': '// Lorem ipsum FOO_H dolor sit amet',
+                'expected': '// Lorem ipsum BAR_H dolor sit amet'
+            },
+        ]
+
+        for test in tests:
+            with self.subTest(original=test['original']):
+                self.assertEqual(test['expected'], replace_header(test['original'], 'foo', 'bar'))
