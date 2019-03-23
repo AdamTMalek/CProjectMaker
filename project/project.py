@@ -1,5 +1,6 @@
 import errno
 import os
+import fileinput
 from shutil import copyfile
 
 directory = ""
@@ -61,3 +62,13 @@ def create_project(project_name):
     if create_folders(project_name):
         create_main_file()
         create_makefile()
+
+
+def rename(old, new):
+    if not os.path.isdir(os.path.join(os.getcwd(), old)):
+        print("Project {} does not exist".format(old))
+
+    os.rename(old, new)
+    makefile_path = (os.path.join(os.getcwd(), new, "makefile"))
+    for line in fileinput.input(makefile_path, inplace=True):
+        print(line.replace(old, new), end='')  # Change the end to an empty string, otherwise it will put another \n.

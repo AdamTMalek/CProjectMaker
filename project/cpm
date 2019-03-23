@@ -15,16 +15,56 @@ def main():
     arg_parser = setup_arg_parser()
     args = arg_parser.parse_args()
 
-    if not valid_name(args.name):
-        print("The name " + args.name + " is not valid. Only alphanumerical characters are accepted.")
+    # Before executing any sub-parser handlers (like project_args_handler)
+    # the name and rename (if used) are validated.
+    # If any of these names are invalid, the program will terminate
+    if hasattr(args, 'rename') and args.rename is not None and not valid_name(args.rename):
+        print_invalid_name_error(args.rename)
         return
 
-    if args.directory and not args.module:
-        print("Directory argument requires module argument to be preset as well")
+    # If the user has not used any option (executed cpm without any arguments)
+    # print the help message and terminate
+    if not hasattr(args, 'name'):
+        arg_parser.print_help()
         return
 
-    if not args.module:
+    if hasattr(args, 'name') and not valid_name(args.name):
+        print_invalid_name_error(args.name)
+        return
+
+    # args.function will call the right args handler depending on the specified argument
+    # For example, if the user executes the program like:
+    # cpm project foo
+    # Then the arg parser will call project_args_handler to handle the arguments
+    args.function(args)
+
+
+def print_invalid_name_error(name):
+    """
+    Print an invalid name error
+    :param name: Invalid name
+    """
+    print("The name " + name + " is not valid. Only alphanumerical characters are accepted.")
+
+
+def project_args_handler(args):
+    """
+    Handle the arguments when project option is used
+    :param args: Parsed arguments
+    """
+    if args.rename:
+        project.rename(args.rename, args.name)
+    else:
         project.create_project(args.name)
+
+
+def module_args_handler(args):
+    """
+    Handle the arguments when module option is used
+    :param args: Parsed arguments
+    """
+    if args.rename:
+        module.rename(args.rename, args.name)
     else:
         module.create_module(args.name, args.directory)
 
@@ -35,16 +75,43 @@ def setup_arg_parser():
     :return: ArgumentParser with supported arguments
     """
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("name", help="create a project with the given name if the module option (-m or --module)"
-                                         " is not specified. The name must consist of only alphanumerical characters")
-    module_group = arg_parser.add_argument_group()
-    module_group.add_argument("-m", "--module", help="create a module (.c and .h files) with the specified name",
-                              action="store_true")
-    module_group.add_argument("-d", "--directory", help="create a directory for the module. "
-                                                        "Note that this argument requires the module argument "
-                                                        "to be preset as well",
-                              action="store_true")
+    subparsers = arg_parser.add_subparsers(help="available options")
+    setup_project_parser(subparsers)
+    setup_module_parser(subparsers)
     return arg_parser
+
+
+def setup_project_parser(subparsers):
+    """
+    Set up the project option and all its arguments
+    :param subparsers: subparsers of the argument parser
+    """
+    parser = subparsers.add_parser('project', help='creates/renames a project')
+    parser.add_argument('-r', '--rename', help='rename project with [old_name] to [name]', metavar='old_name')
+    parser.add_argument("name", help="target project name")
+    # Set a function that will be called to handle the arguments
+    parser.set_defaults(function=project_args_handler)
+
+
+def setup_module_parser(subparsers):
+    """
+    Set up the module option and all its arguments
+    :param subparsers: subparsers of the argument parser
+    """
+    parser = subparsers.add_parser('module', help='creates/renames a module (source + header files)')
+
+    # Because it does not make sense to have rename and directory arguments present at the same time
+    # (it wouldn't be clear what the user wants to achieve)
+    # mutually exclusive group will tell the parser that only one option from that group can be used at a time.
+    mutually_exclusive = parser.add_mutually_exclusive_group()
+    mutually_exclusive.add_argument('-r', '--rename', help='rename module with [old_name] to [name]',
+                                    metavar='old_name')
+    mutually_exclusive.add_argument('-d', '--directory', action='store_true',
+                                    help='create directory for the module')
+
+    parser.add_argument('name', help='target module name')
+    # Set a function that will be called to handle the arguments
+    parser.set_defaults(function=module_args_handler)
 
 
 def valid_name(name):
