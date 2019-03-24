@@ -1,6 +1,7 @@
 import unittest
-from project.module import rename_in_include as replace_include
-from project.module import rename_header_constant as replace_header
+from scripts.module import rename_in_include as replace_include
+from scripts.module import rename_header_constant as replace_header
+
 
 class ModuleTest(unittest.TestCase):
     """
@@ -37,7 +38,6 @@ class ModuleTest(unittest.TestCase):
         for test in tests:
             with self.subTest(original=test['original']):
                 self.assertEqual(test['expected'], replace_include(test['original'], 'foo', 'bar'))
-
 
     def test_header_regex(self):
         """

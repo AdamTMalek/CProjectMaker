@@ -51,7 +51,7 @@ def remove():
 
 
 def create_symlink():
-    target = os.path.join(os.path.abspath(os.path.dirname(__file__)), "project/cpm")
+    target = os.path.join(os.path.abspath(os.path.dirname(__file__)), "scripts/cpm")
     try:
         os.symlink(target, link)
     except OSError as error:
