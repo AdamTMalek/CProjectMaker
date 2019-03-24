@@ -1,12 +1,7 @@
 #!/usr/bin/python3
 
-import sys
-import os
 import re
 import argparse
-
-
-sys.path.append(os.path.join(os.path.dirname(__file__)))
 import project
 import module
 
