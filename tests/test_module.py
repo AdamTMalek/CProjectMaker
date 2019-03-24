@@ -37,7 +37,7 @@ class ModuleTest(unittest.TestCase):
 
         for test in tests:
             with self.subTest(original=test['original']):
-                self.assertEqual(test['expected'], replace_include(test['original'], 'foo', 'bar'))
+                self.assertEqual(test['expected'], replace_include(test['original'], 'foo', 'bar')[0])
 
     def test_header_regex(self):
         """

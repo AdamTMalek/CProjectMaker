@@ -9,7 +9,7 @@ def load(module):
     if len(module) == 0:
         raise ValueError("Module name cannot be empty")
 
-    spec = spec_from_loader(module, SourceFileLoader(module, "../project/" + module))
+    spec = spec_from_loader(module, SourceFileLoader(module, "../scripts/" + module))
     module = module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
