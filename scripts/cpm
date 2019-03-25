@@ -4,11 +4,19 @@ import re
 import argparse
 import project
 import module
+from verbose import *
+
+verbose = None
 
 
 def main():
+    global verbose
     arg_parser = setup_arg_parser()
     args = arg_parser.parse_args()
+
+    if hasattr(args, 'verbose'):
+        level = args.verbose if args.verbose is not None else 0
+        verbose = Verbose(level)
 
     # Before executing any sub-parser handlers (like project_args_handler)
     # the name and rename (if used) are validated.
@@ -39,7 +47,8 @@ def print_invalid_name_error(name):
     Print an invalid name error
     :param name: Invalid name
     """
-    print("The name " + name + " is not valid. Only alphanumerical characters are accepted.")
+    verbose.print(MessageType.ERROR, "The name " + name + " is not valid. Only alphanumerical characters are accepted.",
+                  min_level=0)
 
 
 def project_args_handler(args):
@@ -47,6 +56,7 @@ def project_args_handler(args):
     Handle the arguments when project option is used
     :param args: Parsed arguments
     """
+    project.set_verbose(verbose)
     if args.rename:
         project.rename(args.rename, args.name)
     else:
@@ -58,6 +68,7 @@ def module_args_handler(args):
     Handle the arguments when module option is used
     :param args: Parsed arguments
     """
+    module.set_verbose(verbose)
     if args.rename:
         module.rename(args.rename, args.name)
     else:
@@ -83,6 +94,7 @@ def setup_project_parser(subparsers):
     """
     parser = subparsers.add_parser('project', help='creates/renames a project')
     parser.add_argument('-r', '--rename', help='rename project with [old_name] to [name]', metavar='old_name')
+    parser.add_argument('-v', '--verbose', action='count')
     parser.add_argument("name", help="target project name")
     # Set a function that will be called to handle the arguments
     parser.set_defaults(function=project_args_handler)
@@ -104,6 +116,7 @@ def setup_module_parser(subparsers):
     mutually_exclusive.add_argument('-d', '--directory', action='store_true',
                                     help='create directory for the module')
 
+    parser.add_argument('-v', '--verbose', action='count')
     parser.add_argument('name', help='target module name')
     # Set a function that will be called to handle the arguments
     parser.set_defaults(function=module_args_handler)
