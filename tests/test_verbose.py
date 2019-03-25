@@ -1,4 +1,6 @@
 import unittest
+from contextlib import contextmanager
+from io import StringIO
 from scripts.verbose import *
 
 
@@ -96,3 +98,37 @@ class VerboseTest(unittest.TestCase):
         test(sys.stdout, error_expected=False)
         test(sys.stderr, error_expected=False)
         print("--------------")
+
+    def test_verbosity_condition(self):
+        """
+        Test if the message is printed or not depending on minimum level of verbosity
+        :return:
+        """
+
+        # We use captured_output to capture the output of a function to stdout or stderr
+        @contextmanager
+        def captured_output():
+            out, err = StringIO(), StringIO()
+            old_out, old_err = sys.stdout, sys.stderr
+            try:
+                sys.stdout, sys.stderr = out, err
+                yield sys.stdout
+            finally:
+                sys.stdout, sys.stderr = old_out, old_err
+
+        verbosity = 3
+        verbose = Verbose(verbosity)
+
+        # Testing function
+        def test(min_level, output_expected):
+            with self.subTest(set=verbosity, min=min_level):
+                with captured_output() as output:
+                    verbose.print(MessageType.INFO, "foo", min_level, stream=output)
+                    message_printed = output.getvalue() != ""
+                    self.assertEqual(output_expected, message_printed)
+
+        # Test expected no output:
+        test(4, output_expected=False)
+        # Test expected some output
+        test(3, output_expected=True)
+        test(2, output_expected=True)
