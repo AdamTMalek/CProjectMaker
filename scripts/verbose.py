@@ -49,7 +49,6 @@ class Verbose:
 
         self.level = verbosity_level
 
-    #
     @staticmethod
     def _print(color, prefix, message):
         """

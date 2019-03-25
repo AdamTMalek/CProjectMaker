@@ -1,8 +1,18 @@
 import os
 import re
 import fileinput
+from verbose import *
 
 directory = ""
+verbose = None
+
+
+def set_verbose(verbose_obj):
+    if not isinstance(verbose_obj, Verbose):
+        raise TypeError("verbose_obj must be of type {expected}, not {actual}"
+                        .format(expected=Verbose, actual=type(verbose_obj)))
+    global verbose
+    verbose = verbose_obj
 
 
 def create_source(name):
@@ -33,7 +43,7 @@ def create_module(name, create_directory):
     global directory
 
     if already_exists(name):
-        print("Module with that name already exists.")
+        verbose.print(MessageType.ERROR, "Module with the name {0} already exists.".format(name), min_level=0)
         return
 
     if create_directory:
@@ -212,8 +222,8 @@ def update_usages(old_name, name):
         src_dir = re.match(r'([\S\\ ]+src)', os.getcwd()).group(0)
     except AttributeError:
         # src directory not found
-        print("Warning - src directory was not found in the current path. "
-              "Files that use the module will not be updated")
+        verbose.print(MessageType.WARNING, "src directory was not found in the current path. "
+                                           "Files that use the module will not be updated")
         return
 
     # Get all source files inside src and its subdirectories
@@ -224,7 +234,8 @@ def update_usages(old_name, name):
         if rename_in_source(file, old_name, name) is True:
             updated_count += 1
 
-    print("Successfully updated {0} source file(s) that use this module".format(updated_count))
+    verbose.print(MessageType.INFO,
+                  "Successfully updated {0} source file(s) that use this module".format(updated_count))
 
 
 def rename(old_name, name):
@@ -236,11 +247,15 @@ def rename(old_name, name):
     working_directory = os.getcwd()
 
     if not already_exists(os.path.join(working_directory, old_name)):
-        print("Error - cannot rename the module. Module with the name {0} does not exist.".format(old_name))
+        verbose.print(MessageType.ERROR,
+                      "cannot rename the module. Module with the name {0} does not exist.".format(old_name),
+                      min_level=0)
         return
 
     if already_exists(os.path.join(working_directory, name)):
-        print("Error - cannot rename the module. Module with the name {0} already exists.".format(name))
+        verbose.print(MessageType.ERROR,
+                      "cannot rename the module. Module with the name {0} already exists.".format(name),
+                      min_level=0)
         return
 
     # If the module is created inside a directory, rename it and go inside it
@@ -254,7 +269,7 @@ def rename(old_name, name):
     if header_exists(old_name, file_dir=working_directory):
         rename_header(working_directory, old_name, name)
 
-    print("Successfully renamed the module")
+    verbose.print(MessageType.INFO, "Successfully renamed the module", min_level=0)
 
     update_usages(old_name, name)
 

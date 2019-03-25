@@ -2,9 +2,19 @@ import errno
 import os
 import fileinput
 from shutil import copyfile
+from verbose import *
 
 directory = ""
 name = ""
+verbose = None
+
+
+def set_verbose(verbose_obj):
+    if not isinstance(verbose_obj, Verbose):
+        raise TypeError("verbose_obj must be of type {expected}, not {actual}"
+                        .format(expected=Verbose, actual=type(verbose_obj)))
+    global verbose
+    verbose = verbose_obj
 
 
 def create_folders(project_name):
@@ -21,10 +31,10 @@ def create_folders(project_name):
         os.makedirs(directory)
     except OSError as error:
         if error.errno == errno.EEXIST:
-            print("Error - Project with the same name already exists")
+            verbose.print(MessageType.ERROR, "project with the same name already exists", min_level=0)
             return False
         if error.errno == errno.EACCES:
-            print("Error - Permission denied")
+            verbose.print(MessageType.ERROR, "permission denied", min_level=0)
             return False
         else:
             raise error
@@ -37,7 +47,7 @@ def create_folders(project_name):
 
 def create_main_file():
     if len(directory) == 0:
-        print("Project directory doesn't exist")
+        verbose.print(MessageType.ERROR, "project directory doesn't exist", min_level=0)
         return
 
     template = os.path.join(os.path.dirname(__file__), "../templates/main.c.txt")
@@ -66,7 +76,8 @@ def create_project(project_name):
 
 def rename(old, new):
     if not os.path.isdir(os.path.join(os.getcwd(), old)):
-        print("Project {} does not exist".format(old))
+        verbose.print(MessageType.ERROR, "project {} does not exist".format(old), min_level=0)
+        return
 
     os.rename(old, new)
     makefile_path = (os.path.join(os.getcwd(), new, "makefile"))
