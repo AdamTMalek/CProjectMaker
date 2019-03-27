@@ -78,19 +78,21 @@ int main(int argc, char *argv[])
 ```
 The usage syntax for `project` option is:
 ```
-cpm project [-h] [-r old_name] name
+cpm project [-h] [-r old_name] [-v] name
 ```
 #### Module
 The `module` option is responsible for managing a C module - source and header files and optionally, a directory. 
 
 The usage syntax for the `module` option is:
 ```
-cpm module [-h] [-r old_name | -d] name
+cpm module [-h] [-r old_name | -d] [-v] name
 ```
 This option has three functions:
 * Create source and header files with the given name in the current working directory
 * (With `-d`/`--directory`) Create directory with the given name, then create source and header files inside that directory.
 * (With `-r`/`--rename`) Rename module. Scan all source files inside **src** directory and update includes where applicable
+
+`-v`/`--verbose` flag will lead to more information (if such exists) be printed. Currently it is only used when renaming a module - if the **verbose** flag is present the files that were updated will be listed. 
 
 The source file created will have the following content:
 ```c
