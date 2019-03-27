@@ -230,12 +230,15 @@ def update_usages(old_name, name):
     source_files = get_all_source_files(src_dir)
     # In each file, look for the module usage and update the name if such usage exists
     updated_count = 0  # Number of files that were updated
+    files_updated = []
     for file in source_files:
         if rename_in_source(file, old_name, name) is True:
             updated_count += 1
+            files_updated.append(os.path.relpath(file, src_dir))
 
-    verbose.print(MessageType.INFO,
-                  "Successfully updated {0} source file(s) that use this module".format(updated_count))
+    if files_updated:
+        verbose.print(MessageType.INFO,
+                      "Updated {} files: {}".format(len(files_updated), ", ".join(files_updated)))
 
 
 def rename(old_name, name):
