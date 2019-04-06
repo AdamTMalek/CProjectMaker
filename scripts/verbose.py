@@ -78,7 +78,8 @@ class Verbose:
         if type(min_level) is not int:
             raise TypeError(self._type_error_message("min_level", int, type(min_level)))
 
-        valid_streams = [sys.stdout, sys.stderr]
+        # sys.stdout can be changed and it isn't always the same thing as __stdout__.
+        valid_streams = [sys.stdout, sys.stderr, sys.__stdout__, sys.__stderr__]
         if stream not in valid_streams:
             raise ValueError("Stream {stream} is not a valid output stream. Valid streams are: {valid_streams}"
                              .format(stream=stream, valid_streams=valid_streams))
