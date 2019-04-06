@@ -9,7 +9,7 @@ from verbose import *
 verbose = None
 
 
-def main(args_list):
+def main(args_list=None):
     global verbose
     arg_parser = setup_arg_parser()
     if args_list:
