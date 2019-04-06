@@ -9,10 +9,13 @@ from verbose import *
 verbose = None
 
 
-def main():
+def main(args_list=None):
     global verbose
     arg_parser = setup_arg_parser()
-    args = arg_parser.parse_args()
+    if args_list:
+        args = arg_parser.parse_args(args_list)
+    else:
+        args = arg_parser.parse_args()
 
     if hasattr(args, 'verbose'):
         level = args.verbose if args.verbose is not None else 0
