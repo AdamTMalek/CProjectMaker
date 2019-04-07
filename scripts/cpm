@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
-import re
 import argparse
-import project
+import re
+
 import module
+from project import Project
 from verbose import *
 
 verbose = None
@@ -42,7 +43,7 @@ def main(args_list=None):
     # For example, if the user executes the program like:
     # cpm project foo
     # Then the arg parser will call project_args_handler to handle the arguments
-    args.function(args)
+    args.function(args, verbose)
 
 
 def print_invalid_name_error(name):
@@ -50,23 +51,11 @@ def print_invalid_name_error(name):
     Print an invalid name error
     :param name: Invalid name
     """
-    verbose.print(MessageType.ERROR, "The name " + name + " is not valid. Only alphanumerical characters are accepted.",
-                  min_level=0)
+    Verbose.print_any_level(MessageType.ERROR,
+                            "The name {} is not valid. Only alphanumerical characters are accepted.".format(name))
 
 
-def project_args_handler(args):
-    """
-    Handle the arguments when project option is used
-    :param args: Parsed arguments
-    """
-    project.set_verbose(verbose)
-    if args.rename:
-        project.rename(args.rename, args.name)
-    else:
-        project.create_project(args.name)
-
-
-def module_args_handler(args):
+def module_args_handler(args, _):
     """
     Handle the arguments when module option is used
     :param args: Parsed arguments
@@ -85,22 +74,9 @@ def setup_arg_parser():
     """
     arg_parser = argparse.ArgumentParser()
     subparsers = arg_parser.add_subparsers(help="available options")
-    setup_project_parser(subparsers)
+    Project.add_subparser(subparsers)
     setup_module_parser(subparsers)
     return arg_parser
-
-
-def setup_project_parser(subparsers):
-    """
-    Set up the project option and all its arguments
-    :param subparsers: subparsers of the argument parser
-    """
-    parser = subparsers.add_parser('project', help='creates/renames a project')
-    parser.add_argument('-r', '--rename', help='rename project with [old_name] to [name]', metavar='old_name')
-    parser.add_argument('-v', '--verbose', action='count')
-    parser.add_argument("name", help="target project name")
-    # Set a function that will be called to handle the arguments
-    parser.set_defaults(function=project_args_handler)
 
 
 def setup_module_parser(subparsers):
@@ -114,7 +90,7 @@ def setup_module_parser(subparsers):
     # (it wouldn't be clear what the user wants to achieve)
     # mutually exclusive group will tell the parser that only one option from that group can be used at a time.
     mutually_exclusive = parser.add_mutually_exclusive_group()
-    mutually_exclusive.add_argument('-r', '--rename', help='rename module with [old_name] to [name]',
+    mutually_exclusive.add_argument('-r', '--rename', help='renfame module with [old_name] to [name]',
                                     metavar='old_name')
     mutually_exclusive.add_argument('-d', '--directory', action='store_true',
                                     help='create directory for the module')
