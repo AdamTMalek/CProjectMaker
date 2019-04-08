@@ -2,8 +2,8 @@ import fileinput
 import os
 import re
 
+from scripts.submanager import Submanager
 from scripts.verbose import Verbose, MessageType
-from submanager import Submanager
 
 
 class Module(Submanager):

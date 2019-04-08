@@ -1,11 +1,18 @@
 #!/usr/bin/python3
 
 import argparse
+import os
 import re
+import sys
 
-from module import Module
-from project import Project
-from scripts.verbose import Verbose, MessageType
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')))
+
+# Adding noqa at the end of the following lines will silence PEP8 E402 "module level import not at top of file"
+# It has to stay like this because we have to append the project path first, otherwise the script will not work
+# and an ImportError will occur every time the script is executed.
+from scripts.module import Module  # noqa
+from scripts.project import Project  # noqa
+from scripts.verbose import Verbose, MessageType  # noqa
 
 verbose = None
 
