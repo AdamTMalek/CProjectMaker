@@ -8,10 +8,10 @@ from verbose import *
 
 
 class Project(Submanager):
-    def __init__(self, verbose_obj, project_name):
+    def __init__(self, verbose_obj, name):
         super().__init__(verbose_obj)
-        self.project_name = project_name
-        self.project_directory = os.path.join(os.getcwd(), self.project_name)
+        self.name = name
+        self.directory = os.path.join(os.getcwd(), self.name)
 
     @staticmethod
     def add_subparser(subparsers):
@@ -24,10 +24,12 @@ class Project(Submanager):
 
     @staticmethod
     def handle_args(args, verbose):
+        existing_name = args.name if not args.rename else args.rename
+        project = Project(verbose, existing_name)
+
         if args.rename:
-            Project.rename(args.rename, args.name)
+            project.rename(args.name)
         else:
-            project = Project(verbose, args.name)
             project.create_project()
 
     def create_folders(self):
@@ -36,7 +38,7 @@ class Project(Submanager):
         :return: True if creating folders finished successfully, False otherwise
         """
         try:
-            os.makedirs(self.project_directory)
+            os.makedirs(self.directory)
         except OSError as error:
             if error.errno == errno.EEXIST:
                 Verbose.print_any_level(MessageType.ERROR, "project with the same name already exists")
@@ -47,8 +49,8 @@ class Project(Submanager):
             else:
                 raise error
 
-        os.makedirs(os.path.join(self.project_directory, "src"))
-        os.makedirs(os.path.join(self.project_directory, "build"))
+        os.makedirs(os.path.join(self.directory, "src"))
+        os.makedirs(os.path.join(self.directory, "build"))
 
         return True
 
@@ -57,7 +59,7 @@ class Project(Submanager):
         Create the main.c file
         """
         template = os.path.join(os.path.dirname(__file__), "../templates/main.c.txt")
-        main_file = os.path.join(self.project_directory, "src/main.c")
+        main_file = os.path.join(self.directory, "src/main.c")
         copyfile(template, main_file)
 
     def create_makefile(self):
@@ -65,12 +67,12 @@ class Project(Submanager):
         Create the makefile
         """
         template_path = os.path.join(os.path.dirname(__file__), "../templates/makefile.txt")
-        makefile_path = os.path.join(self.project_directory, "makefile")
+        makefile_path = os.path.join(self.directory, "makefile")
 
         with open(template_path, mode='r') as template:
             with open(makefile_path, mode='w') as makefile:
                 for line in template.readlines():
-                    line = line.replace("[PROJECT_NAME]", self.project_name)
+                    line = line.replace("[PROJECT_NAME]", self.name)
                     makefile.write(line)
 
     def create_project(self):
@@ -81,18 +83,17 @@ class Project(Submanager):
             self.create_main_file()
             self.create_makefile()
 
-    @staticmethod
-    def rename(old, new):
+    def rename(self, new_name):
         """
         Rename the project
-        :param old: old (existing) name
-        :param new: new name
+        :param new_name: new name
         """
-        if not os.path.isdir(os.path.join(os.getcwd(), old)):
-            Verbose.print_any_level(MessageType.ERROR, "project {} does not exist".format(old), stream=sys.stderr)
+        if not os.path.isdir(os.path.join(os.getcwd(), self.name)):
+            Verbose.print_any_level(MessageType.ERROR, "project {} does not exist".format(self.name), stream=sys.stderr)
             return
 
-        os.rename(old, new)
-        makefile_path = (os.path.join(os.getcwd(), new, "makefile"))
+        os.rename(self.name, new_name)
+        makefile_path = (os.path.join(os.getcwd(), new_name, "makefile"))
         for line in fileinput.input(makefile_path, inplace=True):
-            print(line.replace(old, new), end='')  # Change the end to an empty string, otherwise it will put another \n
+            # Change the end to an empty string, otherwise it will put another \n
+            print(line.replace(self.name, new_name), end='')
