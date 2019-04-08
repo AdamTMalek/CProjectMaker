@@ -1,6 +1,7 @@
 import unittest
-from scripts.module import rename_in_include as replace_include
-from scripts.module import rename_header_constant as replace_header
+
+from scripts.module import Module
+from scripts.verbose import Verbose
 
 
 class ModuleTest(unittest.TestCase):
@@ -12,6 +13,7 @@ class ModuleTest(unittest.TestCase):
         """
         Test the include regex used to find and replace #include... when renaming the module
         """
+        module = Module(Verbose(0), "foo")
         tests = [
             {
                 'original': '#include "foo.h"',
@@ -37,12 +39,13 @@ class ModuleTest(unittest.TestCase):
 
         for test in tests:
             with self.subTest(original=test['original']):
-                self.assertEqual(test['expected'], replace_include(test['original'], 'foo', 'bar')[0])
+                self.assertEqual(test['expected'], module.rename_in_include(test['original'], 'bar')[0])
 
     def test_header_regex(self):
         """
         Test the header regex used to find and replace include-guard-constants inside a header
         """
+        module = Module(Verbose(0), "foo")
         tests = [
             {
                 'original': '#ifndef FOO_H',
@@ -64,4 +67,4 @@ class ModuleTest(unittest.TestCase):
 
         for test in tests:
             with self.subTest(original=test['original']):
-                self.assertEqual(test['expected'], replace_header(test['original'], 'foo', 'bar'))
+                self.assertEqual(test['expected'], module.rename_header_constant(test['original'], 'bar'))

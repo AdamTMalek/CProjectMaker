@@ -1,7 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 
-from verbose import Verbose
+from scripts.verbose import Verbose
 
 
 class Submanager(ABC):
@@ -12,7 +12,7 @@ class Submanager(ABC):
         :param verbose_obj: Verbose object
         """
         if not isinstance(verbose_obj, Verbose):
-            raise TypeError("verbose object should be of type {}, not {}".format(type(Verbose), type(verbose_obj)))
+            raise TypeError("verbose object should be of type {}, not {}".format(Verbose, type(verbose_obj)))
         self.verbose = verbose_obj
         self.working_dir = os.getcwd()
 

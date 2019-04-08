@@ -3,9 +3,9 @@
 import argparse
 import re
 
-import module
+from module import Module
 from project import Project
-from verbose import *
+from scripts.verbose import Verbose, MessageType
 
 verbose = None
 
@@ -55,18 +55,6 @@ def print_invalid_name_error(name):
                             "The name {} is not valid. Only alphanumerical characters are accepted.".format(name))
 
 
-def module_args_handler(args, _):
-    """
-    Handle the arguments when module option is used
-    :param args: Parsed arguments
-    """
-    module.set_verbose(verbose)
-    if args.rename:
-        module.rename(args.rename, args.name)
-    else:
-        module.create_module(args.name, args.directory)
-
-
 def setup_arg_parser():
     """
     Set up the parser and all arguments supported by the program
@@ -75,30 +63,8 @@ def setup_arg_parser():
     arg_parser = argparse.ArgumentParser()
     subparsers = arg_parser.add_subparsers(help="available options")
     Project.add_subparser(subparsers)
-    setup_module_parser(subparsers)
+    Module.add_subparser(subparsers)
     return arg_parser
-
-
-def setup_module_parser(subparsers):
-    """
-    Set up the module option and all its arguments
-    :param subparsers: subparsers of the argument parser
-    """
-    parser = subparsers.add_parser('module', help='creates/renames a module (source + header files)')
-
-    # Because it does not make sense to have rename and directory arguments present at the same time
-    # (it wouldn't be clear what the user wants to achieve)
-    # mutually exclusive group will tell the parser that only one option from that group can be used at a time.
-    mutually_exclusive = parser.add_mutually_exclusive_group()
-    mutually_exclusive.add_argument('-r', '--rename', help='renfame module with [old_name] to [name]',
-                                    metavar='old_name')
-    mutually_exclusive.add_argument('-d', '--directory', action='store_true',
-                                    help='create directory for the module')
-
-    parser.add_argument('-v', '--verbose', action='count')
-    parser.add_argument('name', help='target module name')
-    # Set a function that will be called to handle the arguments
-    parser.set_defaults(function=module_args_handler)
 
 
 def valid_name(name):
