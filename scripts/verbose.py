@@ -71,12 +71,24 @@ class Verbose:
         :param stream: stream where the message will be printed, stdout or stderr
         :return:
         """
+        if type(min_level) is not int:
+            raise TypeError(self._type_error_message("min_level", int, type(min_level)))
+
+        if self.level >= min_level:
+            self.print_any_level(message_type, message, stream)
+
+    @staticmethod
+    def print_any_level(message_type, message, stream=sys.stdout):
+        """
+        Print the message ignoring the verbosity level set
+        :param message_type: type of message. Must be an MessageType enum value
+        :param message: message to print
+        :param stream: stream where the message will be printed, stdout or stderr
+        :return:
+        """
         if not isinstance(message_type, MessageType):
             raise TypeError("message_type has to be of type {expected}, not {actual}"
                             .format(expected=MessageType, actual=type(message_type)))
-
-        if type(min_level) is not int:
-            raise TypeError(self._type_error_message("min_level", int, type(min_level)))
 
         # sys.stdout can be changed and it isn't always the same thing as __stdout__.
         valid_streams = [sys.stdout, sys.stderr, sys.__stdout__, sys.__stderr__]
@@ -84,5 +96,4 @@ class Verbose:
             raise ValueError("Stream {stream} is not a valid output stream. Valid streams are: {valid_streams}"
                              .format(stream=stream, valid_streams=valid_streams))
 
-        if self.level >= min_level:
-            self._print(MessageType.get_color(message_type), message_type, message)
+        Verbose._print(MessageType.get_color(message_type), message_type, message)

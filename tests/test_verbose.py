@@ -33,13 +33,11 @@ class VerboseTest(unittest.TestCase):
             with self.subTest(type=message_type):
                 error_thrown = False
                 try:
-                    verbose.print(message_type, "foo", stream=sys.stdout)
+                    Verbose.print_any_level(message_type, "foo", stream=sys.stdout)
                 except TypeError:
                     error_thrown = True
                 self.assertEqual(error_expected, error_thrown)
 
-        # Create an object of Verbose
-        verbose = Verbose(verbosity_level=0)  # Verbosity level does not matter
         # Test with incorrect types:
         test(0)
         test("foo")
