@@ -321,5 +321,5 @@ class Module(Submanager):
         if Module.directory_exists(name):
             return True
 
-        directory = os.path.join(os.getcwd(), name + '/')
+        directory = os.getcwd()
         return Module.header_exists(directory, name) or Module.source_exists(directory, name)
