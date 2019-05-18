@@ -31,7 +31,7 @@ class Module(Submanager):
         # (it wouldn't be clear what the user wants to achieve)
         # mutually exclusive group will tell the parser that only one option from that group can be used at a time.
         mutually_exclusive = parser.add_mutually_exclusive_group()
-        mutually_exclusive.add_argument('-r', '--rename', help='renfame module with [old_name] to [name]',
+        mutually_exclusive.add_argument('-r', '--rename', help='rename module with [old_name] to [name]',
                                         metavar='old_name')
         mutually_exclusive.add_argument('-d', '--directory', action='store_true',
                                         help='create directory for the module')
