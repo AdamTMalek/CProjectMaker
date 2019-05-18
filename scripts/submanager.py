@@ -19,9 +19,17 @@ class Submanager(ABC):
     @staticmethod
     @abstractmethod
     def add_subparser(subparsers):
+        """
+        All submanagers must implement the add_subparser method that takes a subparsers class created from argparse
+        and adds a subparser with arguments and options supported by the submanager.
+        """
         raise NotImplementedError("add_subparsers is not implemented")
 
     @staticmethod
     @abstractmethod
     def handle_args(args, verbose):
+        """
+        This function will be called when the program arguments supported by the submanager need to be handled.
+        All submanagers must implement this function.
+        """
         raise NotImplementedError("handle_args is not implemented")
